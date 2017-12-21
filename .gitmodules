@@ -1,0 +1,9 @@
+[submodule "jumanpp"]
+	path = jumanpp
+	url = git@github.com:ku-nlp/jumanpp.git
+[submodule "grpc"]
+	path = grpc
+	url = git@github.com:grpc/grpc.git
+[submodule "protobuf"]
+	path = protobuf
+	url = git@github.com:google/protobuf.git
