@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package jumanpp.grpc;
+
+import "lattice_dump.proto";
+
+message AnalysisRequest {
+  string key = 1;
+  string sentence = 2;
+}
+
+service JumanppJumandic {
+  rpc LatticeDump (AnalysisRequest) returns (jumanpp.LatticeDump) {}
+  rpc LatticeDumpWithFeatures(AnalysisRequest) returns (jumanpp.LatticeDump) {}
+}
