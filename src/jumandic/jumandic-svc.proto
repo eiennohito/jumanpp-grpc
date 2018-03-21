@@ -4,12 +4,26 @@ package jumanpp.grpc;
 
 import "lattice_dump.proto";
 
+enum RequestType {
+  Normal = 0;
+  PartialAnnotation = 1;
+}
+
 message AnalysisRequest {
   string key = 1;
   string sentence = 2;
+  RequestType type = 3;
+}
+
+message JumanppConfig {
+  int32 local_beam = 1;
+  int32 global_beam_right = 2;
+  int32 global_beam_left = 3;
+  int32 global_beam_check = 4;
 }
 
 service JumanppJumandic {
   rpc LatticeDump (AnalysisRequest) returns (jumanpp.LatticeDump) {}
   rpc LatticeDumpWithFeatures(AnalysisRequest) returns (jumanpp.LatticeDump) {}
+  rpc LatticeDumpStream (stream AnalysisRequest) returns (stream jumanpp.LatticeDump) {}
 }
