@@ -80,7 +80,9 @@ public:
 
 class FullLatticeDumpUnaryCall : public AnaReqBasedUnaryCall<LatticeDump, FullLatticeDumpUnaryCall> {
 public:
-  explicit FullLatticeDumpUnaryCall(JumanppGrpcEnv2* env): AnaReqBasedUnaryCall(env) {}
+  explicit FullLatticeDumpUnaryCall(JumanppGrpcEnv2* env): AnaReqBasedUnaryCall(env) {
+    allFeatures_ = true;
+  }
 
   core::output::LatticeDumpOutput output_{true, false};
 

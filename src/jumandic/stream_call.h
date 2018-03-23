@@ -34,6 +34,7 @@ struct BidiStreamCallBase: public CallImpl {
   AnalysisRequest input_;
   std::deque<CachedAnalyzer*> analyzers_;
   JumanppConfig config_;
+  bool allFeatures_ = false;
 
   enum CallState {
     Initial,
@@ -78,7 +79,7 @@ public:
       }
     }
 
-    auto an = env_->analyzers().acquire(config_, input_);
+    auto an = env_->analyzers().acquire(config_, input_, allFeatures_);
     if (an == nullptr) {
       state_ = Failed;
       rw_.Finish(::grpc::Status{::grpc::StatusCode::ABORTED, "no available analyzer"}, &outputTag_);

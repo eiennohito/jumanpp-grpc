@@ -26,7 +26,7 @@ class BaseUnaryCall: public CallImpl {
     Finished
   };
 
-  State state_ = State::Initial;
+  std::atomic<State> state_{Initial};
 protected:
 
   ::grpc::ServerContext context_;
@@ -39,7 +39,7 @@ public:
   BaseUnaryCall(JumanppGrpcEnv2* env): env_{env} {}
 
   void Handle() override {
-    auto state = state_;
+    auto state = state_.load(std::memory_order_acquire);
     if (state == Initial) {
       child().startCall();
       state_ = Compute;
@@ -55,14 +55,14 @@ public:
         ::google::protobuf::io::ArrayInputStream is(data.data(), data.size());
         ::google::protobuf::io::CodedInputStream cis(&is);
         if (!config_.MergeFromCodedStream(&cis)) {
-          state_ = Finished;
+          state_.store(Finished, std::memory_order_release);
           replier_.FinishWithError(::grpc::Status{::grpc::StatusCode::INVALID_ARGUMENT, "invalid config header"}, this);
           return;
         }
       }
 
       child().handleCall(); //actual logic
-      state_ = Finished;
+      state_.store(Finished, std::memory_order_release);
     } else if (state == Finished) {
       delete this;
     }
@@ -76,11 +76,12 @@ template <typename Reply, typename Child>
 class AnaReqBasedUnaryCall: public BaseUnaryCall<Reply, Child> {
 protected:
   AnalysisRequest req_;
+  bool allFeatures_ = false;
 public:
   explicit AnaReqBasedUnaryCall(JumanppGrpcEnv2* env): BaseUnaryCall<Reply, Child>::BaseUnaryCall(env) {}
 
   void handleCall() {
-    ScopedAnalyzer ana{this->env_->analyzers(), this->config_, req_};
+    ScopedAnalyzer ana{this->env_->analyzers(), this->config_, req_, allFeatures_};
     if (!ana) {
       this->replier_.FinishWithError(
         ::grpc::Status{::grpc::StatusCode::INTERNAL, "failed to acquire analyzer"},

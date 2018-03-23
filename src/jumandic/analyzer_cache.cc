@@ -41,7 +41,7 @@ Status CachedAnalyzer::analyze() {
   return Status::Ok();
 }
 
-bool CachedAnalyzer::isAvailableFor(const JumanppConfig &cfg, const AnalysisRequest &req) const {
+bool CachedAnalyzer::isAvailableFor(const JumanppConfig &cfg, const AnalysisRequest &req, bool allFeatures) const {
   auto st = state_;
   if (st == AnalyzerState::InUse || st == AnalyzerState::WithResult) {
     return false;
@@ -67,11 +67,16 @@ bool CachedAnalyzer::isAvailableFor(const JumanppConfig &cfg, const AnalysisRequ
     return false;
   }
 
+  if (analyzerConfig.storeAllPatterns != allFeatures) {
+    return false;
+  }
+
   return true;
 }
 
-void CachedAnalyzer::setBaseConfig(const core::analysis::AnalyzerConfig &anaconf, const core::JumanppEnv &env) {
+void CachedAnalyzer::setBaseConfig(const core::analysis::AnalyzerConfig &anaconf, const core::JumanppEnv &env, bool allFeatures) {
   analyzerConfig = anaconf;
+  analyzerConfig.storeAllPatterns = allFeatures;
   scoringConfig.numScorers = env.scorers()->numScorers();
 }
 
@@ -86,14 +91,14 @@ void AnalyzerCache::release(CachedAnalyzer *analyzer) {
   analyzer->state_ = AnalyzerState::NotInUse;
 }
 
-CachedAnalyzer *AnalyzerCache::acquire(const JumanppConfig &cfg, const AnalysisRequest &req) {
+CachedAnalyzer *AnalyzerCache::acquire(const JumanppConfig &cfg, const AnalysisRequest &req, bool allFeatures) {
   std::lock_guard<std::mutex> guard{mutex_};
 
   CachedAnalyzer* worst = nullptr;
   auto lastTime = TimePoint::max();
 
   for (auto& v: cache_) {
-    if (v->isAvailableFor(cfg, req)) {
+    if (v->isAvailableFor(cfg, req, allFeatures)) {
       v->state_ = AnalyzerState::InUse;
       return v.get();
     }
@@ -107,7 +112,7 @@ CachedAnalyzer *AnalyzerCache::acquire(const JumanppConfig &cfg, const AnalysisR
     return nullptr;
   }
 
-  worst->setBaseConfig(defaultCfg_, *env_);
+  worst->setBaseConfig(defaultCfg_, *env_, allFeatures);
   worst->setProtoConfig(cfg);
   Status s = worst->buildAnalyzer(*env_);
   if (!s) {

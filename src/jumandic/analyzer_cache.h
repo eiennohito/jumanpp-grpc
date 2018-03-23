@@ -36,7 +36,7 @@ class CachedAnalyzer {
   TimePoint lastUsage_ = TimePoint::min();
   AnalyzerState state_ = AnalyzerState::Uninitialized;
 
-  void setBaseConfig(const core::analysis::AnalyzerConfig &global, const core::JumanppEnv &env);
+  void setBaseConfig(const core::analysis::AnalyzerConfig &global, const core::JumanppEnv &env, bool allFeatures);
 
   void setProtoConfig(const JumanppConfig &cfg) {
     scoringConfig.beamSize = cfg.local_beam();
@@ -48,7 +48,7 @@ class CachedAnalyzer {
   Status buildAnalyzer(const core::JumanppEnv& env);
 
 public:
-  bool isAvailableFor(const JumanppConfig& cfg, const AnalysisRequest& req) const;
+  bool isAvailableFor(const JumanppConfig& cfg, const AnalysisRequest& req, bool allFeatures) const;
   Status readInput(const AnalysisRequest& req, const AnalyzerCache& cache);
   Status analyze();
   bool hasResult() const { return state_ == AnalyzerState::WithResult; }
@@ -78,7 +78,7 @@ public:
   }
 
   const core::input::PexStreamReader& cachedReader() const { return cachedReader_; }
-  CachedAnalyzer* acquire(const JumanppConfig& cfg, const AnalysisRequest& req);
+  CachedAnalyzer* acquire(const JumanppConfig& cfg, const AnalysisRequest& req, bool allFeatures);
   void release(CachedAnalyzer* analyzer);
 };
 
@@ -87,8 +87,8 @@ class ScopedAnalyzer {
   CachedAnalyzer* analyzer_;
 public:
 
-  ScopedAnalyzer(AnalyzerCache& cache, const JumanppConfig& cfg, const AnalysisRequest& req): cache_{cache},
-                                                                                              analyzer_{cache.acquire(cfg, req)} {}
+  ScopedAnalyzer(AnalyzerCache& cache, const JumanppConfig& cfg, const AnalysisRequest& req, bool allFeatures): cache_{cache},
+                                                                                              analyzer_{cache.acquire(cfg, req, allFeatures)} {}
   ~ScopedAnalyzer() {
     if (analyzer_ != nullptr) {
       cache_.release(analyzer_);
