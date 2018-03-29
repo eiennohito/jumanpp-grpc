@@ -10,6 +10,8 @@
 #include "core/env.h"
 #include "jumandic-svc.pb.h"
 #include <chrono>
+#include <atomic>
+#include <mutex>
 
 namespace jumanpp {
 namespace grpc {

@@ -7,6 +7,8 @@
 
 #include <grpc++/grpc++.h>
 #include <thread>
+#include <mutex>
+#include <atomic>
 #include "util/types.hpp"
 #include "util/bounded_queue.h"
 #include "core/env.h"
