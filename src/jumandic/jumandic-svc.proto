@@ -3,6 +3,8 @@ syntax = "proto3";
 package jumanpp.grpc;
 
 import "lattice_dump.proto";
+import "juman.proto";
+import "jumanpp.proto";
 
 enum RequestType {
   Normal = 0;
@@ -13,6 +15,8 @@ message AnalysisRequest {
   string key = 1;
   string sentence = 2;
   RequestType type = 3;
+  JumanppConfig config = 4;
+  int32 top_n = 5;
 }
 
 message JumanppConfig {
@@ -20,10 +24,17 @@ message JumanppConfig {
   int32 global_beam_right = 2;
   int32 global_beam_left = 3;
   int32 global_beam_check = 4;
+  bool ignore_rnn = 5;
 }
 
 service JumanppJumandic {
+  rpc DefaultConfig(JumanppConfig) returns (JumanppConfig) {}
+  rpc Juman (AnalysisRequest) returns (jumanpp.JumanSentence) {}
+  rpc JumanStream (stream AnalysisRequest) returns (stream jumanpp.JumanSentence) {}
+  rpc TopN (AnalysisRequest) returns (jumanpp.Lattice) {}
+  rpc TopNStream (stream AnalysisRequest) returns (stream jumanpp.Lattice) {}
   rpc LatticeDump (AnalysisRequest) returns (jumanpp.LatticeDump) {}
-  rpc LatticeDumpWithFeatures(AnalysisRequest) returns (jumanpp.LatticeDump) {}
   rpc LatticeDumpStream (stream AnalysisRequest) returns (stream jumanpp.LatticeDump) {}
+  rpc LatticeDumpWithFeatures(AnalysisRequest) returns (jumanpp.LatticeDump) {}
+  rpc LatticeDumpWithFeaturesStream(stream AnalysisRequest) returns (stream jumanpp.LatticeDump) {}
 }

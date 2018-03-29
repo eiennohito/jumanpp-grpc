@@ -55,6 +55,10 @@ bool CachedAnalyzer::isAvailableFor(const JumanppConfig &cfg, const AnalysisRequ
     return false;
   }
 
+  if (scoringConfig.numScorers > 1 && cfg.ignore_rnn()) {
+    return false;
+  }
+
   if (analyzerConfig.globalBeamSize != cfg.global_beam_left()) {
     return false;
   }
@@ -81,7 +85,15 @@ void CachedAnalyzer::setBaseConfig(const core::analysis::AnalyzerConfig &anaconf
 }
 
 Status CachedAnalyzer::buildAnalyzer(const core::JumanppEnv &env) {
-  JPP_RETURN_IF_ERROR(analyzer_.initialize(env.coreHolder(), analyzerConfig, scoringConfig, env.scorers()));
+  auto scorer = env.scorers();
+  if (scoringConfig.numScorers != scorer->numScorers()) {
+    cachedDef_.feature = scorer->feature;
+    cachedDef_.scoreWeights.clear();
+    cachedDef_.scoreWeights.push_back(scorer->scoreWeights.front());
+    JPP_RETURN_IF_ERROR(analyzer_.initialize(env.coreHolder(), analyzerConfig, scoringConfig, &cachedDef_));
+  } else {
+    JPP_RETURN_IF_ERROR(analyzer_.initialize(env.coreHolder(), analyzerConfig, scoringConfig, scorer));
+  }
   lastUsage_ = Clock::now();
   return Status::Ok();
 }
@@ -94,33 +106,43 @@ void AnalyzerCache::release(CachedAnalyzer *analyzer) {
 CachedAnalyzer *AnalyzerCache::acquire(const JumanppConfig &cfg, const AnalysisRequest &req, bool allFeatures) {
   std::lock_guard<std::mutex> guard{mutex_};
 
-  CachedAnalyzer* worst = nullptr;
-  auto lastTime = TimePoint::max();
+  CachedAnalyzer* available = nullptr;
+  TimePoint lastUsage = TimePoint::max();
 
   for (auto& v: cache_) {
     if (v->isAvailableFor(cfg, req, allFeatures)) {
+      // non-used compatible analyzer is returned immediately
       v->state_ = AnalyzerState::InUse;
       return v.get();
     }
 
-    if (v->state_ != AnalyzerState::InUse && lastTime > v->lastUsage_) {
-      worst = v.get();
+    if (v->state_ == AnalyzerState::Uninitialized) {
+      // non-initialized analyzer is returned with the highest priority
+      available = v.get();
+      break;
+    }
+
+    if (v->state_ != AnalyzerState::InUse && lastUsage > v->lastUsage_) {
+      // otherwise try to find one not used for a longest time
+      available = v.get();
+      lastUsage = v->lastUsage_;
     }
   }
 
-  if (worst == nullptr) {
+  if (available == nullptr) {
     return nullptr;
   }
 
-  worst->setBaseConfig(defaultCfg_, *env_, allFeatures);
-  worst->setProtoConfig(cfg);
-  Status s = worst->buildAnalyzer(*env_);
+  available->setBaseConfig(defaultCfg_, *env_, allFeatures);
+  available->setProtoConfig(cfg);
+  Status s = available->buildAnalyzer(*env_);
   if (!s) {
     LOG_ERROR() << "Failed to init analyzer: " << s;
     return nullptr;
   }
 
-  return worst;
+  available->state_ = AnalyzerState::InUse;
+  return available;
 }
 
 

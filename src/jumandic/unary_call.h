@@ -44,8 +44,8 @@ public:
       child().startCall();
       state_ = Compute;
     } else if (state == Compute) {
-      auto chld = new Child(env_);
-      chld->Handle(); //fork call
+      auto copy = new Child(env_);
+      copy->Handle(); //fork call
 
       config_.CopyFrom(env_->defaultConfig());
       auto& clientMeta = context_.client_metadata();
@@ -90,6 +90,12 @@ public:
     }
 
     Status s = ana.value()->readInput(req_, this->env_->analyzers());
+
+    if (req_.has_config()) {
+      auto& cfg = req_.config();
+      this->config_.MergeFrom(cfg);
+    }
+
     if (!s) {
       this->replier_.FinishWithError(
         ::grpc::Status{::grpc::StatusCode::INVALID_ARGUMENT, s.message().str()},

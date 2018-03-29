@@ -47,24 +47,7 @@ struct BidiStreamCallBase: public CallImpl {
   std::atomic<CallState> state_{Initial};
   std::mutex mutex_;
 
-public:
-
-  BidiStreamCallBase(JumanppGrpcEnv2* env): env_{env} {}
-
-  // Will be called for new calls
-  void Handle() override {
-    if (state_ == WaitCall) {
-      Child* cld = new Child{env_}; //fork call
-      state_ = Working;
-      rw_.Read(&input_, &inputTag_);
-      cld->Handle();
-    } else {
-      state_ = WaitCall;
-      child().startRequest();
-    }
-  }
-
-  void InputReady() {
+  void ReadCommonConfig() {
     config_.CopyFrom(env_->defaultConfig());
     auto& clientMeta = context_.client_metadata();
     auto iter = clientMeta.find("jumanpp-config-bin");
@@ -78,8 +61,34 @@ public:
         return;
       }
     }
+  }
 
-    auto an = env_->analyzers().acquire(config_, input_, allFeatures_);
+public:
+
+  BidiStreamCallBase(JumanppGrpcEnv2* env): env_{env} {}
+
+  // Will be called for new calls
+  void Handle() override {
+    if (state_ == WaitCall) {
+      Child* cld = new Child{env_}; //fork call
+      state_ = Working;
+      rw_.Read(&input_, &inputTag_);
+      cld->Handle();
+      ReadCommonConfig();
+    } else {
+      state_ = WaitCall;
+      child().startRequest();
+    }
+  }
+
+  void InputReady() {
+    JumanppConfig msgConfig{config_};
+    if (input_.has_config()) {
+      msgConfig.MergeFrom(input_.config());
+    }
+
+    auto an = env_->analyzers().acquire(msgConfig, input_, allFeatures_);
+
     if (an == nullptr) {
       state_ = Failed;
       rw_.Finish(::grpc::Status{::grpc::StatusCode::ABORTED, "no available analyzer"}, &outputTag_);

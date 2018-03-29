@@ -78,9 +78,15 @@ int main(int argc, char const *argv[]) {
   bldr.AddListeningPort(address, ::grpc::InsecureServerCredentials(), &boundPort);
   env.registerService(&bldr);
   auto server = bldr.BuildAndStart();
+  env.callImpl<DefaultConfigCall>();
+  env.callImpl<JumanUnaryCall>();
+  env.callImpl<JumanStreamCall>();
+  env.callImpl<TopNUnaryCall>();
+  env.callImpl<TopNStreamCall>();
   env.callImpl<LatticeDumpStreamImpl>();
   env.callImpl<LatticeDumpUnaryCall>();
   env.callImpl<FullLatticeDumpUnaryCall>();
+  env.callImpl<LatticeDumpStreamFullImpl>();
   env.start(args.nthreads);
 
   return 0;

@@ -14,6 +14,7 @@
 #include "jumandic-svc.grpc.pb.h"
 #include "interfaces.h"
 #include "analyzer_cache.h"
+#include "jumandic/shared/jumandic_id_resolver.h"
 
 namespace jumanpp {
 namespace grpc {
@@ -70,6 +71,7 @@ class JumanppGrpcEnv2 {
   JumanppConfig defaultConfig_;
   AnalyzerCache cache_;
   core::analysis::AnalyzerConfig defaultAconf_;
+  jumandic::JumandicIdResolver idResolver_;
 
 public:
   JumanppJumandic::AsyncService& service() { return asyncService_; }
@@ -77,6 +79,8 @@ public:
   AnalyzerCache& analyzers() { return cache_; }
   ::grpc::ServerCompletionQueue* mainQueue() { return mainQueue_.get(); }
   ::grpc::ServerCompletionQueue* poolQueue() { return poolQueue_.get(); }
+  const jumandic::JumandicIdResolver* idResolver() const { return &idResolver_; }
+  const core::CoreHolder& core() const { return *jppEnv_.coreHolder(); }
 
   void registerService(::grpc::ServerBuilder* bldr) {
     bldr->RegisterService(&asyncService_);

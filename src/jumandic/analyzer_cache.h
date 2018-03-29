@@ -35,6 +35,7 @@ class CachedAnalyzer {
   std::string comment_;
   TimePoint lastUsage_ = TimePoint::min();
   AnalyzerState state_ = AnalyzerState::Uninitialized;
+  core::analysis::ScorerDef cachedDef_;
 
   void setBaseConfig(const core::analysis::AnalyzerConfig &global, const core::JumanppEnv &env, bool allFeatures);
 
@@ -43,6 +44,9 @@ class CachedAnalyzer {
     analyzerConfig.globalBeamSize = cfg.global_beam_left();
     analyzerConfig.rightGbeamSize = cfg.global_beam_right();
     analyzerConfig.rightGbeamCheck = cfg.global_beam_check();
+    if (cfg.ignore_rnn()) {
+      scoringConfig.numScorers = 1;
+    }
   }
 
   Status buildAnalyzer(const core::JumanppEnv& env);
@@ -57,6 +61,7 @@ public:
   const core::analysis::WeightBuffer* weights() const { return &analyzer_.scorer()->feature->weights(); }
   StringPiece comment() const { return comment_; }
   friend class AnalyzerCache;
+  int localBeam() const { return scoringConfig.beamSize; }
 };
 
 class AnalyzerCache {
