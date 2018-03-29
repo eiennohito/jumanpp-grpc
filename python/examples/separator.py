@@ -2,7 +2,6 @@ import os, sys
 import grpc
 import jumanpp_grpc.jumandic_svc_pb2_grpc as jg
 import jumanpp_grpc.jumandic_svc_pb2 as jpb
-from google.protobuf import text_format
 
 
 def loop(svc):
@@ -10,8 +9,9 @@ def loop(svc):
         str = input("Sentece: ")
         req = jpb.AnalysisRequest()
         req.sentence = str
-        result = svc.LatticeDump(req)
-        sys.stdout.buffer.write(text_format.MessageToString(result, as_utf8 = True).encode("utf-8"))
+        result = svc.Juman(req)
+        data = [f"{m.surface}_{m.string_pos.pos}" for m in result.morphemes]
+        print(" ".join(data))
 
 
 def main():
