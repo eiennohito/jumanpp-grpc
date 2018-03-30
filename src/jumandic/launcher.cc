@@ -68,14 +68,16 @@ int main(int argc, char const *argv[]) {
   }
 
   ::grpc::ServerBuilder bldr;
-  std::string address = "[::]";
-  if (args.port != -1) {
-    address += ":";
+  std::string address = "[::]:";
+  if (args.port > 0) {    
     address += std::to_string(args.port);
+  } else {
+    address += "0";
   }
 
   int boundPort = -1;
   bldr.AddListeningPort(address, ::grpc::InsecureServerCredentials(), &boundPort);
+
   env.registerService(&bldr);
   auto server = bldr.BuildAndStart();
   env.callImpl<DefaultConfigCall>();
@@ -87,6 +89,12 @@ int main(int argc, char const *argv[]) {
   env.callImpl<LatticeDumpUnaryCall>();
   env.callImpl<FullLatticeDumpUnaryCall>();
   env.callImpl<LatticeDumpStreamFullImpl>();
+
+  if (args.port <= 0) {
+    std::cout << boundPort << "\n"
+              << std::flush;
+  }
+
   env.start(args.nthreads);
 
   return 0;
