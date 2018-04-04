@@ -28,7 +28,7 @@ public:
 
 template <typename Out, typename Child>
 struct BidiStreamCallBase: public CallImpl {
-  JumanppGrpcEnv2* env_;
+  JumanppGrpcEnv* env_;
   ::grpc::ServerContext context_;
   ::grpc::ServerAsyncReaderWriter<Out, AnalysisRequest> rw_{&context_};
   AnalysisRequest input_;
@@ -65,7 +65,7 @@ struct BidiStreamCallBase: public CallImpl {
 
 public:
 
-  BidiStreamCallBase(JumanppGrpcEnv2* env): env_{env} {}
+  BidiStreamCallBase(JumanppGrpcEnv* env): env_{env} {}
 
   // Will be called for new calls
   void Handle() override {

@@ -31,12 +31,12 @@ protected:
 
   ::grpc::ServerContext context_;
   ::grpc::ServerAsyncResponseWriter<Reply> replier_{&context_};
-  JumanppGrpcEnv2* env_;
+  JumanppGrpcEnv* env_;
   JumanppConfig config_;
 
 public:
 
-  BaseUnaryCall(JumanppGrpcEnv2* env): env_{env} {}
+  BaseUnaryCall(JumanppGrpcEnv* env): env_{env} {}
 
   void Handle() override {
     auto state = state_.load(std::memory_order_acquire);
@@ -78,7 +78,7 @@ protected:
   AnalysisRequest req_;
   bool allFeatures_ = false;
 public:
-  explicit AnaReqBasedUnaryCall(JumanppGrpcEnv2* env): BaseUnaryCall<Reply, Child>::BaseUnaryCall(env) {}
+  explicit AnaReqBasedUnaryCall(JumanppGrpcEnv* env): BaseUnaryCall<Reply, Child>::BaseUnaryCall(env) {}
 
   void handleCall() {
     ScopedAnalyzer ana{this->env_->analyzers(), this->config_, req_, allFeatures_};

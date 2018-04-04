@@ -17,6 +17,7 @@ struct JumanppGrpcArgs {
   std::string configPath;
   int port = -1;
   int nthreads = 1;
+  bool printVersion = false;
 
   static bool ParseArgs(JumanppGrpcArgs* result, int argc, const char** argv) {
     args::ArgumentParser parser{"gRPC wrapper for Juman++"};
@@ -24,6 +25,7 @@ struct JumanppGrpcArgs {
     args::ValueFlag<int> port{parser, "PORT", "Port to listen. -1 for automatic (will be printed to stdout).", {"port"}};
     args::ValueFlag<int> nthreads{parser, "NUM", "Number of computation threads", {"threads", 't'}};
     args::HelpFlag help{parser, "HELP", "Prints this message", {'h', "help"}};
+    args::Flag version{parser, "VERSION", "Print version", {'v', "version"}};
 
     try {
       if (!parser.ParseCLI(argc, argv)) {
@@ -49,6 +51,10 @@ struct JumanppGrpcArgs {
       result->nthreads = nthreads.Get();
     }
 
+    if (version) {
+      result->printVersion = true;
+    }
+
     return true;
   }
 };
@@ -60,10 +66,18 @@ int main(int argc, char const *argv[]) {
     exit(1);
   }
 
-  JumanppGrpcEnv2 env;
+  JumanppGrpcEnv env;
   auto s = env.loadConfig(args.configPath);
   if (!s) {
-    std::cerr << s;
+    if (args.printVersion) {
+      env.printVersion();
+    } else {
+      std::cerr << s;
+    }
+
+    exit(1);
+  } else if (args.printVersion) {
+    env.printVersion();
     exit(1);
   }
 

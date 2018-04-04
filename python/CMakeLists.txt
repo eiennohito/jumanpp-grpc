@@ -46,6 +46,4 @@ foreach(FILE ${JPP_PROTO_SRCS})
   list(APPEND OUT_PYFILES ${PB_OUTNAME})
 endforeach(FILE)
 
-message(${OUT_PYFILES})
-
 add_custom_target(python DEPENDS ${OUT_PYFILES})

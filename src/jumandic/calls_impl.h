@@ -17,7 +17,7 @@ namespace grpc {
 class DefaultConfigCall : public BaseUnaryCall<JumanppConfig, DefaultConfigCall> {
   JumanppConfig topConf_;
 public:
-  explicit DefaultConfigCall(JumanppGrpcEnv2* env): BaseUnaryCall(env) {}
+  explicit DefaultConfigCall(JumanppGrpcEnv* env): BaseUnaryCall(env) {}
 
   void startCall() {
     env_->service().RequestDefaultConfig(&context_, &topConf_, &replier_, env_->poolQueue(), env_->poolQueue(), this);
@@ -33,7 +33,7 @@ class JumanUnaryCall : public AnaReqBasedUnaryCall<JumanSentence, JumanUnaryCall
   jumandic::JumanPbFormat output_;
 
 public:
-  explicit JumanUnaryCall(JumanppGrpcEnv2* env): AnaReqBasedUnaryCall(env) {}
+  explicit JumanUnaryCall(JumanppGrpcEnv* env): AnaReqBasedUnaryCall(env) {}
 
   void startCall() {
     env_->service().RequestJuman(&context_, &req_, &replier_, env_->poolQueue(), env_->poolQueue(), this);
@@ -65,7 +65,7 @@ class JumanStreamCall : public BidiStreamCallBase<JumanSentence, JumanStreamCall
 public:
   jumandic::JumanPbFormat output_;
 
-  explicit JumanStreamCall(JumanppGrpcEnv2* env): BidiStreamCallBase(env) {}
+  explicit JumanStreamCall(JumanppGrpcEnv* env): BidiStreamCallBase(env) {}
 
   void startRequest() {
     env_->service().RequestJumanStream(&context_, &rw_, env_->mainQueue(), env_->poolQueue(), this);
@@ -97,7 +97,7 @@ class TopNUnaryCall : public AnaReqBasedUnaryCall<Lattice, TopNUnaryCall> {
   jumandic::JumanppProtobufOutput output_;
 
 public:
-  explicit TopNUnaryCall(JumanppGrpcEnv2* env): AnaReqBasedUnaryCall(env) {}
+  explicit TopNUnaryCall(JumanppGrpcEnv* env): AnaReqBasedUnaryCall(env) {}
 
   void startCall() {
     env_->service().RequestTopN(&context_, &req_, &replier_, env_->poolQueue(), env_->poolQueue(), this);
@@ -133,7 +133,7 @@ class TopNStreamCall : public BidiStreamCallBase<Lattice, TopNStreamCall> {
 public:
   jumandic::JumanppProtobufOutput output_;
 
-  explicit TopNStreamCall(JumanppGrpcEnv2* env): BidiStreamCallBase(env) {}
+  explicit TopNStreamCall(JumanppGrpcEnv* env): BidiStreamCallBase(env) {}
 
   void startRequest() {
     env_->service().RequestTopNStream(&context_, &rw_, env_->mainQueue(), env_->poolQueue(), this);
@@ -169,7 +169,7 @@ public:
 
 class LatticeDumpUnaryCall : public  AnaReqBasedUnaryCall<LatticeDump, LatticeDumpUnaryCall> {
 public:
-  explicit LatticeDumpUnaryCall(JumanppGrpcEnv2* env): AnaReqBasedUnaryCall(env) {}
+  explicit LatticeDumpUnaryCall(JumanppGrpcEnv* env): AnaReqBasedUnaryCall(env) {}
 
 
   core::output::LatticeDumpOutput output_{false, false};
@@ -203,7 +203,7 @@ class LatticeDumpStreamImpl: public BidiStreamCallBase<LatticeDump, LatticeDumpS
 public:
   core::output::LatticeDumpOutput output_{false, false};
 
-  explicit LatticeDumpStreamImpl(JumanppGrpcEnv2* env): BidiStreamCallBase(env) {}
+  explicit LatticeDumpStreamImpl(JumanppGrpcEnv* env): BidiStreamCallBase(env) {}
 
   void startRequest() {
     env_->service().RequestLatticeDumpStream(&context_, &rw_, env_->mainQueue(), env_->poolQueue(), this);
@@ -235,7 +235,7 @@ public:
 
 class FullLatticeDumpUnaryCall : public AnaReqBasedUnaryCall<LatticeDump, FullLatticeDumpUnaryCall> {
 public:
-  explicit FullLatticeDumpUnaryCall(JumanppGrpcEnv2* env): AnaReqBasedUnaryCall(env) {
+  explicit FullLatticeDumpUnaryCall(JumanppGrpcEnv* env): AnaReqBasedUnaryCall(env) {
     allFeatures_ = true;
   }
 
@@ -270,7 +270,7 @@ class LatticeDumpStreamFullImpl: public BidiStreamCallBase<LatticeDump, LatticeD
 public:
   core::output::LatticeDumpOutput output_{true, false};
 
-  explicit LatticeDumpStreamFullImpl(JumanppGrpcEnv2* env): BidiStreamCallBase(env) {}
+  explicit LatticeDumpStreamFullImpl(JumanppGrpcEnv* env): BidiStreamCallBase(env) {}
 
   void startRequest() {
     env_->service().RequestLatticeDumpWithFeaturesStream(&context_, &rw_, env_->mainQueue(), env_->poolQueue(), this);

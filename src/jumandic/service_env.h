@@ -64,7 +64,7 @@ public:
 
 void drainQueue(::grpc::ServerCompletionQueue* queue);
 
-class JumanppGrpcEnv2 {
+class JumanppGrpcEnv {
   core::JumanppEnv jppEnv_;
   CQThreadPool threadpool_;
   JumanppJumandic::AsyncService asyncService_;
@@ -112,9 +112,11 @@ public:
     }
   }
 
+  void printVersion();
+
   Status loadConfig(StringPiece configPath);
 
-  ~JumanppGrpcEnv2() {
+  ~JumanppGrpcEnv() {
     threadpool_.stop();
     if (mainQueue_) {
       mainQueue_->Shutdown();

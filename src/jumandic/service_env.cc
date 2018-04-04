@@ -9,7 +9,7 @@
 namespace jumanpp {
 namespace grpc {
 
-Status JumanppGrpcEnv2::loadConfig(StringPiece configPath) {
+Status JumanppGrpcEnv::loadConfig(StringPiece configPath) {
   jumandic::JumanppConf conf;
   JPP_RETURN_IF_ERROR(jumandic::parseCfgFile(configPath, &conf, 1));
   JPP_RETURN_IF_ERROR(jppEnv_.loadModel(conf.modelFile.value()));
@@ -25,6 +25,26 @@ Status JumanppGrpcEnv2::loadConfig(StringPiece configPath) {
   JPP_RETURN_IF_ERROR(cache_.initialize(&jppEnv_, defaultAconf_, 40));
   JPP_RETURN_IF_ERROR(idResolver_.initialize(jppEnv_.coreHolder()->dic()));
   return Status::Ok();
+}
+
+void JumanppGrpcEnv::printVersion() {
+  core::VersionInfo vinfo{};
+  jppEnv_.fillVersion(&vinfo);
+
+  std::cout << "Juman++-gRPC "
+            << vinfo.binary;
+  if (!vinfo.dictionary.empty()) {
+    std::cout << " Dictionary: " << vinfo.dictionary;
+  }
+
+  if (!vinfo.model.empty()) {
+    std::cout << " Model: " << vinfo.model;
+  }
+
+  if (!vinfo.rnn.empty()) {
+    std::cout << " RNN: " << vinfo.rnn;
+  }
+  std::cout << std::endl;
 }
 
 void drainQueue(::grpc::ServerCompletionQueue *queue) {
