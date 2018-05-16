@@ -20,10 +20,10 @@ message AnalysisRequest {
 }
 
 message JumanppConfig {
-  int32 local_beam = 1;
-  int32 global_beam_right = 2;
-  int32 global_beam_left = 3;
-  int32 global_beam_check = 4;
+  sint32 local_beam = 1;
+  sint32 global_beam_right = 2;
+  sint32 global_beam_left = 3;
+  sint32 global_beam_check = 4;
   bool ignore_rnn = 5;
 }
 
