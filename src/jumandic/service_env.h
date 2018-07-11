@@ -114,7 +114,7 @@ public:
 
   void printVersion();
 
-  Status loadConfig(StringPiece configPath);
+  Status loadConfig(StringPiece configPath, bool generic);
 
   ~JumanppGrpcEnv() {
     threadpool_.stop();

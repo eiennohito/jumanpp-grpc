@@ -18,6 +18,7 @@ struct JumanppGrpcArgs {
   int port = -1;
   int nthreads = 1;
   bool printVersion = false;
+  bool generic = false;
 
   static bool ParseArgs(JumanppGrpcArgs* result, int argc, const char** argv) {
     args::ArgumentParser parser{"gRPC wrapper for Juman++"};
@@ -26,6 +27,7 @@ struct JumanppGrpcArgs {
     args::ValueFlag<int> nthreads{parser, "NUM", "Number of computation threads", {"threads", 't'}};
     args::HelpFlag help{parser, "HELP", "Prints this message", {'h', "help"}};
     args::Flag version{parser, "VERSION", "Print version", {'v', "version"}};
+    args::Flag generic{parser, "GENERIC", "Handle non-jumandic models", {"generic"}};
 
     try {
       if (!parser.ParseCLI(argc, argv)) {
@@ -55,6 +57,10 @@ struct JumanppGrpcArgs {
       result->printVersion = true;
     }
 
+    if (generic) {
+      result->generic = true;
+    }
+
     return true;
   }
 };
@@ -67,7 +73,7 @@ int main(int argc, char const *argv[]) {
   }
 
   JumanppGrpcEnv env;
-  auto s = env.loadConfig(args.configPath);
+  auto s = env.loadConfig(args.configPath, args.generic);
   if (!s) {
     if (args.printVersion) {
       env.printVersion();
@@ -94,11 +100,13 @@ int main(int argc, char const *argv[]) {
 
   env.registerService(&bldr);
   auto server = bldr.BuildAndStart();
-  env.callImpl<DefaultConfigCall>();
-  env.callImpl<JumanUnaryCall>();
-  env.callImpl<JumanStreamCall>();
-  env.callImpl<TopNUnaryCall>();
-  env.callImpl<TopNStreamCall>();
+  if (!args.generic) {
+    env.callImpl<DefaultConfigCall>();
+    env.callImpl<JumanUnaryCall>();
+    env.callImpl<JumanStreamCall>();
+    env.callImpl<TopNUnaryCall>();
+    env.callImpl<TopNStreamCall>();
+  }
   env.callImpl<LatticeDumpStreamImpl>();
   env.callImpl<LatticeDumpUnaryCall>();
   env.callImpl<FullLatticeDumpUnaryCall>();

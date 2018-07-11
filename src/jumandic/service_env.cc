@@ -9,12 +9,16 @@
 namespace jumanpp {
 namespace grpc {
 
-Status JumanppGrpcEnv::loadConfig(StringPiece configPath) {
+Status JumanppGrpcEnv::loadConfig(StringPiece configPath, bool generic) {
   jumandic::JumanppConf conf;
   JPP_RETURN_IF_ERROR(jumandic::parseCfgFile(configPath, &conf, 1));
   JPP_RETURN_IF_ERROR(jppEnv_.loadModel(conf.modelFile.value()));
   jppEnv_.setRnnConfig(conf.rnnConfig);
-  JPP_RETURN_IF_ERROR(jppEnv_.initFeatures(jumandic::jumandicStaticFeatures()));
+  if (generic) {
+    JPP_RETURN_IF_ERROR(jppEnv_.initFeatures(nullptr));
+  } else {
+    JPP_RETURN_IF_ERROR(jppEnv_.initFeatures(jumandic::jumandicStaticFeatures()));
+  }
   defaultConfig_.set_local_beam(conf.beamSize);
   defaultConfig_.set_global_beam_left(conf.globalBeam);
   defaultConfig_.set_global_beam_check(conf.rightCheck);
