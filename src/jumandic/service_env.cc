@@ -27,7 +27,9 @@ Status JumanppGrpcEnv::loadConfig(StringPiece configPath, bool generic) {
   defaultAconf_.rightGbeamCheck = conf.rightCheck;
   defaultAconf_.rightGbeamSize = conf.rightBeam;
   JPP_RETURN_IF_ERROR(cache_.initialize(&jppEnv_, defaultAconf_, 40));
-  JPP_RETURN_IF_ERROR(idResolver_.initialize(jppEnv_.coreHolder()->dic()));
+  if (!generic) {
+    JPP_RETURN_IF_ERROR(idResolver_.initialize(jppEnv_.coreHolder()->dic()));
+  }
   return Status::Ok();
 }
 
