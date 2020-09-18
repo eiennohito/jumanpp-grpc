@@ -44,6 +44,7 @@ We assume that you are still in the `build` folder.
 
 First, generate gRPC python files with:
 ```shell
+$ cmake .. -D JPP_GRPC_PYTHON=ON
 $ pip3 install grpcio-tools
 $ make python
 $ cd python
