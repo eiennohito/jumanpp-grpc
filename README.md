@@ -29,7 +29,7 @@ to the default directory.
 Now launch the server using
 
 ```shell
-./src/jumanpp-grpc \
+./src/jumandic/jumanpp-jumandic-grpc \
     --config=/usr/local/libexec/jumanpp/jumandic.config \
     --port=51231 \
     --threads=2
