@@ -29,7 +29,7 @@ to the default directory.
 Now launch the server using
 
 ```shell
-./src/jumanpp-grpc \
+./src/jumandic/jumanpp-jumandic-grpc \
     --config=/usr/local/libexec/jumanpp/jumandic.config \
     --port=51231 \
     --threads=2
@@ -44,6 +44,7 @@ We assume that you are still in the `build` folder.
 
 First, generate gRPC python files with:
 ```shell
+$ cmake .. -D JPP_GRPC_PYTHON=ON
 $ pip3 install grpcio-tools
 $ make python
 $ cd python
@@ -52,7 +53,7 @@ $ pip3 install -e .
 
 You can now run the client with:
 ```shell
-$ python3 ../python/example/separator.py localhost:51231
+$ python3 ../python/examples/separator.py localhost:51231
 Sentece: すもももももももものうち
 すもも_名詞 も_助詞 もも_名詞 も_助詞 もも_名詞 の_助詞 うち_名詞
 Sentece:  
