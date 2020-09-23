@@ -53,7 +53,7 @@ $ pip3 install -e .
 
 You can now run the client with:
 ```shell
-$ python3 ../python/example/separator.py localhost:51231
+$ python3 ../python/examples/separator.py localhost:51231
 Sentece: すもももももももものうち
 すもも_名詞 も_助詞 もも_名詞 も_助詞 もも_名詞 の_助詞 うち_名詞
 Sentece:  
